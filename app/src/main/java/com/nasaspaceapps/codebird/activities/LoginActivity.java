@@ -19,9 +19,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.gson.Gson;
 import com.nasaspaceapps.codebird.R;
 import com.nasaspaceapps.codebird.pojo.User;
+import com.nasaspaceapps.codebird.utils.UserRegistration;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pixplicity.easyprefs.library.Prefs;
@@ -121,20 +121,20 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (result.isSuccess()) {
             //Getting google account
             GoogleSignInAccount acct = result.getSignInAccount();
-            Gson gson = new Gson();
-            String all_data = gson.toJson(acct);
+
             User user = new User();
             user.setEmail(acct != null ? acct.getEmail() : null);
             assert acct != null;
             user.setFullname(acct.getDisplayName());
             user.setGoogle_ID(acct.getId());
             user.setPic(acct.getPhotoUrl().toString());
+            UserRegistration userRegistration = new UserRegistration(getApplicationContext(), user);
+            userRegistration.sendRequest();
             startActivity(new Intent(getApplicationContext(), MainActivtiy.class));
-
             Prefs.putString("user_image", acct.getPhotoUrl().toString());
 
-            Log.e("All User Data", all_data);
 
+            finish();
 
         } else {
             //If login fails

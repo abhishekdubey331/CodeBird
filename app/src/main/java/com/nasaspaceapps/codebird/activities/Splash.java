@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.nasaspaceapps.codebird.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.pixplicity.easyprefs.library.Prefs;
 
 public class Splash extends AppCompatActivity {
 
@@ -32,7 +33,13 @@ public class Splash extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                if (Prefs.getBoolean("login_status", false))
+                    startActivity(new Intent(getApplicationContext(), MainActivtiy.class));
+
+                else {
+                    startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                }
+
                 finish();
             }
         }, 3000);

@@ -14,19 +14,19 @@ public class FontTextView extends android.support.v7.widget.AppCompatTextView {
 
     public FontTextView(Context context) {
         super(context);
-        Typeface face = Typeface.createFromAsset(context.getAssets(), "museosans-500.otf");
+        Typeface face = Typeface.createFromAsset(context.getAssets(), "fonts/museosans-500.otf");
         this.setTypeface(face);
     }
 
     public FontTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Typeface face = Typeface.createFromAsset(context.getAssets(), "museosans-500.otf");
+        Typeface face = Typeface.createFromAsset(context.getAssets(), "fonts/museosans-500.otf");
         this.setTypeface(face);
     }
 
     public FontTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        Typeface face = Typeface.createFromAsset(context.getAssets(), "museosans-500.otf");
+        Typeface face = Typeface.createFromAsset(context.getAssets(), "fonts/museosans-500.otf");
         this.setTypeface(face);
     }
 
