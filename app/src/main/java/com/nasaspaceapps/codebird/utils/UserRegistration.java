@@ -10,6 +10,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.nasaspaceapps.codebird.R;
+import com.nasaspaceapps.codebird.database.DatabaseHelper;
 import com.nasaspaceapps.codebird.pojo.User;
 import com.pixplicity.easyprefs.library.Prefs;
 
@@ -27,7 +29,6 @@ public class UserRegistration {
     private Context context;
     private User user;
 
-    private String user_registration_url = "http://52.26.68.140:8080/register";
     private String user_login_url = "http://52.26.68.140:8080/login";
 
     public UserRegistration(Context context, User user) {
@@ -36,6 +37,10 @@ public class UserRegistration {
         this.user = user;
     }
 
+    public UserRegistration(Context context) {
+        requestQueue = Volley.newRequestQueue(context);
+        this.context = context;
+    }
 
     public void sendAgainForUserId() {
 
@@ -92,6 +97,7 @@ public class UserRegistration {
 
     public void sendRequest() {
 
+        String user_registration_url = "http://52.26.68.140:8080/register";
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 user_registration_url, new Response.Listener<String>() {
 
@@ -121,10 +127,89 @@ public class UserRegistration {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("username", user.getFullname());
+                params.put("user_name", user.getFullname());
                 params.put("email", user.getEmail());
                 params.put("gid", user.getGoogle_ID());
                 params.put("dp", user.getPic());
+
+                return params;
+            }
+
+        };
+
+        requestQueue.add(strReq);
+    }
+
+
+    public void sendSightData(final String ImageUrl) throws JSONException {
+        String sight_data_url = "http://52.26.68.140:8080/put_userdata";
+        final JSONObject sight_data = new JSONObject();
+        int count = 0;
+        try {
+            sight_data.put("latitude", Prefs.getString("latitude", ""));
+            sight_data.put("longitude", Prefs.getString("longitude", ""));
+            sight_data.put("image_url", ImageUrl);
+
+            DatabaseHelper databaseHelper = new DatabaseHelper(context);
+            count = databaseHelper.getCount();
+
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+
+        final JSONArray jsonArray = new JSONArray();
+        jsonArray.put(sight_data);
+
+        if (count > 0) {
+            Log.e("Count", count + "");
+            DatabaseHelper databaseHelper = new DatabaseHelper(context);
+
+            for (int i = 0; i < count; i++) {
+                jsonArray.put(databaseHelper.getJsonObject(i + 1));
+            }
+        }
+
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                sight_data_url, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+
+
+                Log.e("Response", response);
+
+                DatabaseHelper databaseHelper = new DatabaseHelper(context);
+                databaseHelper.createJson(sight_data.toString());
+
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("VolleyError", "Error: " + error.getMessage());
+            }
+        }) {
+
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+
+
+                params.put("sighting_data", jsonArray.toString());
+                params.put("user_id", Prefs.getString("user_id", ""));
+                int score = Prefs.getInt("score", 0);
+                params.put("user_score", String.valueOf(score));
+                params.put("token", Prefs.getString("token", context.getString(R.string.token)));
 
                 return params;
             }

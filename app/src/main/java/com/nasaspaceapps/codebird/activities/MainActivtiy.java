@@ -1,11 +1,17 @@
 package com.nasaspaceapps.codebird.activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -22,22 +28,50 @@ import android.widget.Toast;
 
 import com.nasaspaceapps.codebird.R;
 import com.nasaspaceapps.codebird.utils.SatusBar;
+import com.nasaspaceapps.codebird.utils.UserRegistration;
 import com.pixplicity.easyprefs.library.Prefs;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import net.gotev.uploadservice.MultipartUploadRequest;
+import net.gotev.uploadservice.ServerResponse;
+import net.gotev.uploadservice.UploadInfo;
+import net.gotev.uploadservice.UploadNotificationConfig;
+import net.gotev.uploadservice.UploadStatusDelegate;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.util.Calendar;
+
+import dmax.dialog.SpotsDialog;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.functions.Action1;
 
 public class MainActivtiy extends AppCompatActivity {
 
     CardView cardView1, cardView2, cardView3;
+    AlertDialog dialog;
+
+    private static final int CAMERA_REQUEST = 1888;
+    String timestamp;
+    File file;
+    int PERMISSION_ALL = 1;
+    String[] PERMISSIONS = {Manifest.permission.WRITE_CONTACTS, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SatusBar.setTransparent(this);
         setContentView(R.layout.activity_main);
+        dialog = new SpotsDialog(MainActivtiy.this);
+
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
 
         cardView1 = (CardView) findViewById(R.id.leaderBoard);
 
@@ -83,6 +117,17 @@ public class MainActivtiy extends AppCompatActivity {
 
     }
 
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     public void onSomeButtonClick() {
         if (!permissionsGranted()) {
@@ -111,13 +156,111 @@ public class MainActivtiy extends AppCompatActivity {
                         Prefs.putString("latitude", String.valueOf(location.getLatitude()));
                         Prefs.putString("longitude", String.valueOf(location.getLongitude()));
                         Log.e("Location", location.getLatitude() + "\n" + location.getLongitude());
+
+
+                        activeTakePhoto();
+
                     }
                 });
 
     }
 
+
+    public void uploadMultipart(File fi) {
+        //getting name for the image
+
+        //getting the actual path of the image
+        String path = fi.getPath();
+
+        //Uploading code
+        try {
+            String uploadId = timestamp;
+            Log.e("Path", path);
+
+            //Creating a multi part request
+            new MultipartUploadRequest(getApplicationContext(), uploadId, "http://35.165.216.139:8080/upload_simage")
+                    .addFileToUpload(path, "bn")
+                    .setNotificationConfig(new UploadNotificationConfig())
+                    .setMaxRetries(2).setDelegate(new UploadStatusDelegate() {
+                @Override
+                public void onProgress(Context context, UploadInfo uploadInfo) {
+                    // your code here
+                    dialog.show();
+                    dialog.setMessage("Please Wait");
+
+                }
+
+                @Override
+                public void onError(Context context, UploadInfo uploadInfo, Exception exception) {
+                    // your code here
+                }
+
+                @Override
+                public void onCompleted(Context context, UploadInfo uploadInfo, ServerResponse serverResponse) {
+                    // your code here
+                    // if you have mapped your server response to a POJO, you can easily get it:
+                    // YourClass obj = new Gson().fromJson(serverResponse.getBodyAsString(), YourClass.class);
+                    Log.e("Uploaded", serverResponse.getBodyAsString());
+
+
+                    try {
+                        Prefs.putInt("count", Prefs.getInt("count", 0) + 1);
+                        int score = Prefs.getInt("score", 0);
+                        score = score + 3;
+                        Prefs.putInt("score", score);
+                        JSONObject jsonObject = new JSONObject(serverResponse.getBodyAsString());
+                        UserRegistration userRegistration = new UserRegistration(getApplicationContext());
+                        userRegistration.sendSightData("https://s3-us-west-2.amazonaws.com/" + jsonObject.getString("path"));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    dialog.dismiss();
+
+                    showLocationDialog();
+
+
+                }
+
+                @Override
+                public void onCancelled(Context context, UploadInfo uploadInfo) {
+                    // your code here
+                }
+            }).startUpload();//Starting the upload
+
+        } catch (Exception exc) {
+            Toast.makeText(getApplicationContext(), exc.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private Boolean permissionsGranted() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+
+    private void activeTakePhoto() {
+        Calendar cal = Calendar.getInstance();
+        timestamp = cal.getTimeInMillis() + "";
+
+        file = new File(Environment.getExternalStorageDirectory(), (timestamp + ".jpg"));
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT,
+                Uri.fromFile(file));
+        startActivityForResult(intent, CAMERA_REQUEST);
+    }
+
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
+
+            uploadMultipart(file);
+
+        }
+
     }
 
 
@@ -158,6 +301,34 @@ public class MainActivtiy extends AppCompatActivity {
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showLocationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivtiy.this);
+        builder.setTitle("Sight Status");
+        builder.setMessage("You have successfully submitted.");
+
+        String positiveText = getString(android.R.string.ok);
+        builder.setPositiveButton(positiveText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // positive button logic
+                    }
+                });
+
+        String negativeText = getString(android.R.string.cancel);
+        builder.setNegativeButton(negativeText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // negative button logic
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        // display dialog
+        dialog.show();
     }
 
 

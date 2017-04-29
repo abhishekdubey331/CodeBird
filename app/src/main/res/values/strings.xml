@@ -8,4 +8,6 @@
     <string name="enter_sight">Enter Sight</string>
     <string name="leaderboard">Leaderboard</string>
     <string name="your_sights">Your Sights</string>
+    <string name="dialog_title">Sight Status</string>
+    <string name="token">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdHVzZXIiLCJpYXQiOjE0OTM0Nzc5MzIsImV4cCI6MTQ5NjE3NzkzMn0.PqUiYVD4xIKj89Nkcwlh95qGdZAyHz4_QylFezX_NUw</string>
 </resources>

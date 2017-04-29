@@ -7,9 +7,6 @@ import com.pixplicity.easyprefs.library.Prefs;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
-/**
- * Created by Dubey's on 29-04-2017.
- */
 
 public class Global extends Application {
 
@@ -23,16 +20,16 @@ public class Global extends Application {
                 .setPrefsName(getPackageName())
                 .setUseDefaultSharedPreference(true)
                 .build();
-
-
         Picasso.Builder builder = new Picasso.Builder(this);
-        builder.downloader(new OkHttpDownloader(this,Integer.MAX_VALUE));
+        builder.downloader(new OkHttpDownloader(this, Integer.MAX_VALUE));
         Picasso built = builder.build();
         built.setIndicatorsEnabled(true);
         built.setLoggingEnabled(true);
         Picasso.setSingletonInstance(built);
 
     }
+
+
 
 
 }
