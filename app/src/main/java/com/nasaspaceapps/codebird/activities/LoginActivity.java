@@ -24,6 +24,7 @@ import com.nasaspaceapps.codebird.R;
 import com.nasaspaceapps.codebird.pojo.User;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.pixplicity.easyprefs.library.Prefs;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
@@ -129,6 +130,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             user.setGoogle_ID(acct.getId());
             user.setPic(acct.getPhotoUrl().toString());
             startActivity(new Intent(getApplicationContext(), MainActivtiy.class));
+
+            Prefs.putString("user_image", acct.getPhotoUrl().toString());
 
             Log.e("All User Data", all_data);
 
