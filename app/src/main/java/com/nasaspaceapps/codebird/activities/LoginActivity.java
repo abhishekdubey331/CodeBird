@@ -21,6 +21,7 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 import com.nasaspaceapps.codebird.R;
+import com.nasaspaceapps.codebird.pojo.User;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
@@ -121,6 +122,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             GoogleSignInAccount acct = result.getSignInAccount();
             Gson gson = new Gson();
             String all_data = gson.toJson(acct);
+            User user = new User();
+            user.setEmail(acct != null ? acct.getEmail() : null);
+            assert acct != null;
+            user.setFullname(acct.getDisplayName());
+            user.setGoogle_ID(acct.getId());
+            user.setPic(acct.getPhotoUrl().toString());
+            startActivity(new Intent(getApplicationContext(), MainActivtiy.class));
+
             Log.e("All User Data", all_data);
 
 
