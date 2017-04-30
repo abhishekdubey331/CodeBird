@@ -77,7 +77,22 @@ public class MainActivtiy extends AppCompatActivity {
 
         cardView2 = (CardView) findViewById(R.id.new_sight);
 
+        cardView1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), LeaderBoardsActivity.class));
+
+            }
+        });
+
         cardView3 = (CardView) findViewById(R.id.your_sights);
+
+        cardView3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), UserSightsActivity.class));
+            }
+        });
 
         cardView2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -210,7 +225,7 @@ public class MainActivtiy extends AppCompatActivity {
                         Prefs.putInt("score", score);
                         JSONObject jsonObject = new JSONObject(serverResponse.getBodyAsString());
                         UserRegistration userRegistration = new UserRegistration(getApplicationContext());
-                        userRegistration.sendSightData("https://s3-us-west-2.amazonaws.com/" + jsonObject.getString("path"));
+                        userRegistration.sendSightData("https://s3-us-west-2.amazonaws.com" + jsonObject.getString("path"));
 
                     } catch (JSONException e) {
                         e.printStackTrace();

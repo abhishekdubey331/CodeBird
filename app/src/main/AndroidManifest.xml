@@ -24,7 +24,8 @@
         </activity>
         <activity android:name=".activities.LoginActivity" />
         <activity android:name=".activities.MainActivtiy" />
-        <activity android:name=".activities.UserSightsActivity"></activity>
+        <activity android:name=".activities.UserSightsActivity" />
+        <activity android:name=".activities.LeaderBoardsActivity"></activity>
     </application>
 
 </manifest>

@@ -29,29 +29,24 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:adjustViewBounds="true"
                 android:padding="2dp"
-                android:src="@drawable/ic_binoculars" />
+                android:src="@drawable/codebird" />
 
 
             <com.nasaspaceapps.codebird.customviews.FontTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Last Reported Sights"
+                android:layout_gravity="center_horizontal"
+                android:text="Top Sighters"
                 android:textColor="#404040"
                 android:textSize="18sp" />
         </LinearLayout>
 
     </android.support.v7.widget.CardView>
-
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="?attr/actionBarSize" />
 
 
     <android.support.v7.widget.RecyclerView

@@ -12,6 +12,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.nasaspaceapps.codebird.R;
 import com.nasaspaceapps.codebird.database.DatabaseHelper;
+import com.nasaspaceapps.codebird.interfaces.VolleyCallback;
 import com.nasaspaceapps.codebird.pojo.User;
 import com.pixplicity.easyprefs.library.Prefs;
 
@@ -210,6 +211,45 @@ public class UserRegistration {
                 int score = Prefs.getInt("score", 0);
                 params.put("user_score", String.valueOf(score));
                 params.put("token", Prefs.getString("token", context.getString(R.string.token)));
+
+                return params;
+            }
+
+        };
+
+        requestQueue.add(strReq);
+    }
+
+
+    public void getSightData(final VolleyCallback callback) {
+
+        String user_registration_url = "http://52.26.68.140:8080/user_profile";
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                user_registration_url, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+
+                callback.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("VolleyError", "Error: " + error.getMessage());
+            }
+        }) {
+
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user_id", Prefs.getString("user_id", ""));
+                params.put("token", Prefs.getString("token", ""));
 
                 return params;
             }
